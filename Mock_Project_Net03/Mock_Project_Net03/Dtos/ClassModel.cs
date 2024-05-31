@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Mock_Project_Net03.Entities;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Mock_Project_Net03.Dtos
 {
@@ -10,21 +12,19 @@ namespace Mock_Project_Net03.Dtos
         [MaxLength(255)]
         public string ClassName { get; set; }
 
-        public int ProgramId { get; set; }
+        public string? ClassCode { get; set; }
+        public int? ProgramId { get; set; }
 
-        public int InstructorId { get; set; }
+        public int? SemesterId { get; set; }
 
-        public DateTime StartDate { get; set; }
+        public int? InstructorId { get; set; }
 
-        public DateTime EndDate { get; set; }
-
-        public string Time { get; set; } // Representing ClassTime enum as string
-
+        public Semester? Semester { get; set; }
         [MaxLength(50)]
-        public string Status { get; set; }
+        public string? Status { get; set; }
 
-        public TrainingProgramModel Program { get; set; }
+        public TrainingProgram? Program { get; set; }
 
-        public UserModel Instructor { get; set; }
+        public User? Instructor { get; set; }
     }
 }

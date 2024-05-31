@@ -25,7 +25,7 @@ namespace Mock_Project_Net03.Controllers
         }
 
         [HttpGet("GetAll")]
-        [Authorize(Roles = "Super Admin")]
+        [Authorize]
         public async Task<IActionResult> GetListPermissions()
         {
             var result = await _permissionService.GetAllPermissions();
@@ -35,9 +35,20 @@ namespace Mock_Project_Net03.Controllers
             }));
         }
 
+        [HttpGet("GetByRoleId/{id}")]
+        [Authorize]
+        public async Task<IActionResult> GePermissionsByRoleId(int id)
+        {
+            var result = _permissionService.GetPermissionByRoleId(id);
+            return Ok(ApiResult<PermissionResponse>.Succeed(new PermissionResponse
+            {
+                Permission = result,
+            }));
+        }
+
         [HttpPut]
         [Route("Update")]
-        [Authorize(Roles = "Super Admin")]
+        [Authorize(Roles = "Super Admin, Admin, Instructor")]
         public async Task<IActionResult> UpdatePermission([FromBody] List<PermissionRequest> permissions)
         {
             if (permissions == null)
@@ -102,7 +113,7 @@ namespace Mock_Project_Net03.Controllers
             var result = await _permissionService.UpdatePermissions(permissionModels);
             if (result is not null)
             {
-                return Ok(ApiResult<PermissionRespone>.Succeed(new PermissionRespone
+                return Ok(ApiResult<PermissionResponeList>.Succeed(new PermissionResponeList
                 {
                     Permissions = permissionModels
                 }));

@@ -18,6 +18,10 @@ namespace Mock_Project_Net03.Entities
 
         public string? CreateBy { get; set; }
 
+        public DateTime? CreateDate { get; set; }
+        public string? LastUpdatedBy { get; set; }
+        public DateTime? LastModifiedDate { get; set; }
+
         public string? Version { get; set; }
 
         public DateTime? StartDate { get; set; }

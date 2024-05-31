@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.Web.CodeGeneration.Design;
 using Mock_Project_Net03.Dtos;
@@ -34,13 +35,20 @@ namespace Mock_Project_Net03.Services
         }
         public async Task<OutputStandardModel> GetOutPutStandardById(int id)
         {
-            var outPutStandard = await _outPutStandardRepository.FindByCondition(o => o.OutputStandardId == id).FirstOrDefaultAsync();
-            if(outPutStandard == null)
+            try
             {
-                throw new BadHttpRequestException("This OutputStandard hasn't been existed");
+                var outPutStandard = await _outPutStandardRepository.GetByIdAsync(id);
+                if (outPutStandard == null)
+                {
+                    throw new BadHttpRequestException("This OutputStandard hasn't been existed");
+                }
+                var opModel = _mapper.Map<OutputStandardModel>(outPutStandard);
+                return opModel;
             }
-            var opModel = _mapper.Map<OutputStandardModel>(outPutStandard);
-            return opModel;
+            catch(Exception ex)
+            {
+                throw ex;
+            }
 
         }
         public async Task<List<OutputStandardModel>> GetAllOutPutStandards()

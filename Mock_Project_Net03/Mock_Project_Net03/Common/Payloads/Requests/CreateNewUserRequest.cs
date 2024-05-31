@@ -37,7 +37,7 @@ namespace Mock_Project_Net03.Common.Payloads.Requests
             var UserModel = new UserModel()
             {
                 UserName = req.UserName,
-                Password = SecurityUtil.Hash(req.Password),
+                // Password = SecurityUtil.Hash(req.Password),
                 FullName = req.FullName,
                 Gender = req.Gender,
                 Level = req.Level,

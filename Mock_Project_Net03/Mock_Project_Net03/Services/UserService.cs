@@ -335,14 +335,14 @@ namespace Mock_Project_Net03.Services
                                               .FirstOrDefault();
             var checkInActive = existedUser.Status.ToLower();
 
-            if (checkInActive == "inactive")
+            if(checkInActive == "inactive") 
             {
                 throw new NotFoundException("User is inactive");
             }
 
             if (existedUser is null)
             {
-                throw new NotFoundException("User not found");
+                throw new NotFoundException("User not found");    
             }
 
             var userRole = _userRoleRepository.FindByCondition(x => x.RoleId == roleId)
@@ -365,7 +365,7 @@ namespace Mock_Project_Net03.Services
             {
                 UserId = user.UserId,
                 UserName = user.UserName,
-                Password = user.Password,
+                // Password = user.Password,
                 FullName = user.FullName,
                 Email = user.Email,
                 Gender = user.Gender,
@@ -451,7 +451,7 @@ namespace Mock_Project_Net03.Services
                     {
                         UserId = user.UserId,
                         UserName = user.UserName,
-                        Password = user.Password,
+                        // Password = user.Password,
                         FullName = user.FullName,
                         Email = user.Email,
                         Gender = user.Gender,
@@ -658,8 +658,8 @@ namespace Mock_Project_Net03.Services
 
         public async Task<List<UserModel>> GetUserInActive()
         {
-            var listUser = _userRepository.GetAll().Where(x => x.Status == "InActive");
-            if (listUser.Count() > 0)
+            var listUser =  _userRepository.GetAll().Where(x => x.Status == "InActive");
+            if(listUser.Count() > 0)
             {
                 return _mapper.Map<List<UserModel>>(listUser);
             }

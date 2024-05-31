@@ -77,7 +77,7 @@ namespace Mock_Project_Net03.Services
                 var trainningProgramIds = sy.TrainingProgram_Syllabus
                                           .Select(x => x.TrainingProgramId).ToList();
                 var classTrainingUnits = _classTrainingUnitRepository.GetAll()
-                                         .Where(x => trainningProgramIds.Contains(x.Class.ProgramId))
+                                         .Where(x => trainningProgramIds.Contains((int)x.Class.ProgramId))
                                          .Include(x => x.Class)
                                          .ThenInclude(x => x.Program)
                                          .ToList();

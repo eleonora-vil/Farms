@@ -24,7 +24,12 @@ namespace Mock_Project_Net03.Services
             var permissionModels = _mapper.Map<List<PermissionModel>>(result);
             return Task.FromResult(permissionModels);
         }
-
+        public PermissionModel GetPermissionByRoleId(int id)
+        {
+            var permission = _permissionRepository.FindByCondition(x => x.RoleID == id).FirstOrDefault();
+            var permissionModel = _mapper.Map<PermissionModel>(permission);
+            return permissionModel;
+        }
         public async Task<PermissionModel> CreateNewPermission(PermissionModel newPermission)
         {
             var permissionEntity = _mapper.Map<Permission>(newPermission);

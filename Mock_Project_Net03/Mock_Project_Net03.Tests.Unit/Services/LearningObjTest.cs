@@ -1,15 +1,15 @@
-﻿/*using AutoMapper;
-using FluentAssertions;
-using Mock_Project_Net03.Dtos;
-using Mock_Project_Net03.Entities;
-using Mock_Project_Net03.Exceptions;
-using Mock_Project_Net03.Repositories;
-using Mock_Project_Net03.Services.Syllabus;
-using NSubstitute;
-using System;
-using System.Linq.Expressions;
-using System.Threading.Tasks;
-using Xunit;
+﻿//using AutoMapper;
+//using FluentAssertions;
+//using Mock_Project_Net03.Dtos;
+//using Mock_Project_Net03.Entities;
+//using Mock_Project_Net03.Exceptions;
+//using Mock_Project_Net03.Repositories;
+//using Mock_Project_Net03.Services.Syllabus;
+//using NSubstitute;
+//using System;
+//using System.Linq.Expressions;
+//using System.Threading.Tasks;
+//using Xunit;
 
 //namespace Mock_Project_Net03.Tests.Unit.Services.Syllabus
 //{
@@ -81,7 +81,7 @@ using Xunit;
 //            {
 //                Name = "Sample Learning Objective",
 //                OutputStandardId = 2,
-//                TrainningTime = DateTime.Now ,
+//                TrainningTime = DateTime.Now,
 //                Method = true,
 //                UnitId = 1
 //            };
@@ -112,8 +112,8 @@ using Xunit;
 //            _trainingProgramUnitRepo.FindByCondition(Arg.Any<Expression<Func<TrainingProgramUnit, bool>>>())
 //                .Returns(callInfo => Enumerable.Empty<TrainingProgramUnit>().AsQueryable());
 
-            // Act & Assert
-            await Assert.ThrowsAsync<BadRequestException>(() => _syllabusOutlineLearningObjServices.CreateLearningObj(newLearningObj));
-        }
-    }
-}*/
+//            //Act & Assert
+//            await Assert.ThrowsAsync<BadRequestException>(() => _syllabusOutlineLearningObjServices.CreateLearningObj(newLearningObj));
+//        }
+//    }
+//}

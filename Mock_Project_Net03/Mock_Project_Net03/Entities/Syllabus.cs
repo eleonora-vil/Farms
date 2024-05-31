@@ -20,7 +20,9 @@ namespace Mock_Project_Net03.Entities
 
         public DateTime CreatedDate { get; set; }
 
+        public string? CreatedBy { get; set; }
         public DateTime? UpdatedDate { get; set; }
+        public string? UpdatedBy { get; set; }
 
         public string? Outline { get; set; }
         public string? Level { get; set; }

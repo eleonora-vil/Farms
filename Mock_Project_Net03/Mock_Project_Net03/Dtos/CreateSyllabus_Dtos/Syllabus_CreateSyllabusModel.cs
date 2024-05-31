@@ -16,8 +16,10 @@ namespace Mock_Project_Net03.Dtos
         public string? Description { get; set; }
 
         public DateTime CreatedDate { get; set; } = DateTime.Now;
+        public string? CreatedBy { get; set; }
 
         public DateTime UpdatedDate { get; set; }
+        public string? UpdatedBy { get; set; }
 
         public string? Outline { get; set; }
         public string? Level { get; set; }

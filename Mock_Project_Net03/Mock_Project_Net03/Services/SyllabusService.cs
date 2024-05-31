@@ -11,6 +11,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Formats.Asn1;
 using System.Linq;
+using Microsoft.CodeAnalysis.Scripting.Hosting;
+using Microsoft.IdentityModel.Tokens;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Query.ExpressionTranslators.Internal;
+using OfficeOpenXml;
 
 namespace Mock_Project_Net03.Services
 {
@@ -61,80 +65,23 @@ namespace Mock_Project_Net03.Services
             _createFullSyllabusService = createFullSyllabusService;
         }
 
-<<<<<<< ef38e5022e36f55d891e8a839b2f39209be9e309
         public async Task<(GetSyllabusByIdResponse, List<OutputStandardModel>)> getSyllabusById(int id)
-=======
-
-
-        //public async Task<GetSyllabusByIdModel> getSyllabusById(int id)
-        //{
-        //    var syllabus = await _syllabusRepository.FindByCondition(x => x.SyllabusId == id)
-        //        .Include(x => x.Instructor)
-        //        .Include(x => x.AssessmentScheme_Syllabus)
-        //            .ThenInclude(y => y.AssessmentScheme)
-        //        .Include(x => x.TrainingProgram_Syllabus)
-        //            .ThenInclude(y => y.TrainingProgram)
-        //        .FirstOrDefaultAsync();
-        //    if (syllabus != null)
-        //    {
-        //        var trainingProgramUnits = await _trainingProgramUnitRepository.FindByCondition(y => y.SyllabusId == id)
-        //            .ToListAsync();
-
-
-        //        var    syllabusModel = new GetSyllabusByIdModel
-        //        {
-        //            SyllabusId = syllabus.SyllabusId,
-        //            Name = syllabus.Name,
-        //            Code = syllabus.Code,
-        //            Description = syllabus.Description,
-        //            CreatedDate = syllabus.CreatedDate,
-        //            UpdatedDate = syllabus.UpdatedDate,
-        //            Outline = syllabus.Outline,
-        //            Level = syllabus.Level,
-        //            Version = syllabus.Version,
-        //            TechnicalRequirement = syllabus.TechnicalRequirement,
-        //            CourseObjectives = syllabus.CourseObjectives,
-        //            TrainingDelivery = syllabus.TrainingDelivery,
-        //            Status = syllabus.Status,
-        //            AttendeeNumber = syllabus.AttendeeNumber,
-        //            InstructorId = syllabus.InstructorId,
-        //            InstructorName = syllabus.Instructor?.FullName,
-        //            InstructorLevel = syllabus.Instructor?.Level,
-        //            TrainingProgramUnit = trainingProgramUnits
-        //                .Select(unit => new TraningProgramUnitResponse
-        //                {
-
-        //                    UnitId = unit.UnitId,
-        //                    UnitName = unit.UnitName,
-        //                    Description = unit.Description,
-        //                    Time = unit.Time,
-        //                    SyllabusId = unit.SyllabusId
-
-
-        //                }).ToList()
-        //        };
-
-        //        return syllabusModel;
-        //    }
-        //    return null;
-        //}
-
-        public async Task<GetSyllabusByIdResponse> getSyllabusById(int id)
->>>>>>> 0d7d474b5a53ec1bc24bd8ef7d0817d371501737
         {
             var syllabus = await _syllabusRepository.FindByCondition(x => x.SyllabusId == id)
                 .Include(x => x.Instructor)
                 .Include(x => x.AssessmentScheme_Syllabus)
-                    .ThenInclude(y => y.AssessmentScheme)
+                .ThenInclude(y => y.AssessmentScheme)
                 .Include(x => x.TrainingProgram_Syllabus)
-                    .ThenInclude(y => y.TrainingProgram)
+                .ThenInclude(y => y.TrainingProgram)
                 .FirstOrDefaultAsync();
-            
+
             if (syllabus != null)
             {
-                var trainingProgramUnits = await _trainingProgramUnitRepository.FindByCondition(y => y.SyllabusId == id).OrderBy(x=>x.Index)
+                var trainingProgramUnits = await _trainingProgramUnitRepository.FindByCondition(y => y.SyllabusId == id)
+                    .OrderBy(x => x.Index)
                     .ToListAsync();
-                 var assessmentSchemeSyllabus = await _assessmentSchemeSyllabusRepository.FindByCondition(x=>x.SyllabusId == id).ToListAsync();
+                var assessmentSchemeSyllabus = await _assessmentSchemeSyllabusRepository
+                    .FindByCondition(x => x.SyllabusId == id).ToListAsync();
                 //foreach ( var AssessmentSchemeId in assessmentSchemeSyllabus)
                 //{
                 //var assessmentScheme = await _assessmentSchemeRepository.FindByCondition(x => x.AssessmentSchemeId ==assessmentSchemeSyllabus.);
@@ -158,17 +105,19 @@ namespace Mock_Project_Net03.Services
                     AttendeeNumber = syllabus.AttendeeNumber,
                     InstructorId = syllabus.InstructorId,
                     InstructorName = syllabus.Instructor?.FullName,
-                    Slot = trainingProgramUnits.Count(),                    
-                 // InstructorLevel = syllabus.Instructor?.Level,
+                    Slot = trainingProgramUnits.Count(),
+                    // InstructorLevel = syllabus.Instructor?.Level,
                     Unit = new List<TrainingProgramUnitResponse>(),
-                    
-                  assessmentSchemeSyllabus = new List<AssessmentSchemaResponse>()
+
+                    assessmentSchemeSyllabus = new List<AssessmentSchemaResponse>()
                 };
                 var outPutStandard = new List<OutputStandardModel>();
 
                 foreach (var syllabusItem in assessmentSchemeSyllabus)
                 {
-                    var assessmentScheme = await _assessmentSchemeRepository.FindByCondition(x => x.AssessmentSchemeId == syllabusItem.AssessmentSchemeId).FirstOrDefaultAsync();
+                    var assessmentScheme = await _assessmentSchemeRepository
+                        .FindByCondition(x => x.AssessmentSchemeId == syllabusItem.AssessmentSchemeId)
+                        .FirstOrDefaultAsync();
 
                     if (assessmentScheme != null)
                     {
@@ -180,31 +129,38 @@ namespace Mock_Project_Net03.Services
                             AssessmentSchemeName = assessmentScheme.AssessmentSchemeName,
                         };
 
-                        syllabusModel.assessmentSchemeSyllabus.Add(assessmentSchemeModel); // Assuming AssessmentScheme is a list
+                        syllabusModel.assessmentSchemeSyllabus
+                            .Add(assessmentSchemeModel); // Assuming AssessmentScheme is a list
                     }
                 }
+
                 foreach (var unit in trainingProgramUnits)
                 {
-                    var learningObjs = await _learningObjRepository.FindByCondition(x => x.UnitId == unit.UnitId).Include(x => x.OutputStandard)
-                                                                  .ToListAsync();
-                    
+                    var learningObjs = await _learningObjRepository.FindByCondition(x => x.UnitId == unit.UnitId)
+                        .Include(x => x.OutputStandard)
+                        .ToListAsync();
+
                     var unitModel = new TrainingProgramUnitResponse
                     {
                         UnitId = unit.UnitId,
                         UnitName = unit.UnitName,
                         Description = unit.Description,
                         Time = (int)unit.Time,
-                        Status=unit.Status,
+                        Status = unit.Status,
                         Index = unit.Index,
                         SyllabusId = (int)unit.SyllabusId,
                         LearningObjs = new List<LearningObjResponse>()
                     };
-                     outPutStandard = _mapper.Map<List<OutputStandardModel>>(learningObjs.Select(x => x.OutputStandard).DistinctBy(x => x.OutputStandardId));
+                    outPutStandard = _mapper.Map<List<OutputStandardModel>>(learningObjs.Select(x => x.OutputStandard)
+                        .DistinctBy(x => x.OutputStandardId));
                     foreach (var learningObj in learningObjs)
                     {
-                        var materials = await _materialsRepository.FindByCondition(x => x.LearningObjId == learningObj.LearningObjId)
-                                                                  .ToListAsync();
-                        var outputStandard = await _outputStandardRepository.FindByCondition(x=>x.OutputStandardId == learningObj.OutputStandardId).FirstOrDefaultAsync();
+                        var materials = await _materialsRepository
+                            .FindByCondition(x => x.LearningObjId == learningObj.LearningObjId)
+                            .ToListAsync();
+                        var outputStandard = await _outputStandardRepository
+                            .FindByCondition(x => x.OutputStandardId == learningObj.OutputStandardId)
+                            .FirstOrDefaultAsync();
                         var learningObjModel = new LearningObjResponse
                         {
                             UnitId = (int)learningObj.UnitId,
@@ -223,7 +179,7 @@ namespace Mock_Project_Net03.Services
                                 Description = outputStandard.Description,
                                 Tags = outputStandard.Tags,
                             },
-                            
+
 
 
                             Material = materials.Select(material => new MaterialsResponse
@@ -243,7 +199,7 @@ namespace Mock_Project_Net03.Services
 
                     syllabusModel.Unit.Add(unitModel);
                 }
-                
+
 
 
                 return (syllabusModel, outPutStandard);
@@ -252,18 +208,20 @@ namespace Mock_Project_Net03.Services
             return (null, null);
         }
 
-        public async Task<SyllabusModel> GetSimpleSyllabusById(int id) 
+        public async Task<SyllabusModel> GetSimpleSyllabusById(int id)
         {
-            var syllabus =await _syllabusRepository.GetByIdAsync(id);
-            if (syllabus is null) 
+            var syllabus = await _syllabusRepository.GetByIdAsync(id);
+            if (syllabus is null)
             {
                 throw new BadRequestException("Cannot found this Syllabus");
             }
+
             return _mapper.Map<SyllabusModel>(syllabus);
         }
 
 
-        public async Task<(IEnumerable<SyllabusModel>, int totalPages)> GetAllSyllabusAsync(int pageNumber, int pageSize)
+        public async Task<(IEnumerable<SyllabusModel>, int totalPages)> GetAllSyllabusAsync(int pageNumber,
+            int pageSize)
         {
             if (pageNumber <= 0 || pageSize <= 0)
             {
@@ -278,32 +236,33 @@ namespace Mock_Project_Net03.Services
             }
 
             var syllabusQuery = await _syllabusRepository
-                                .GetAll()
-                                .Include(x => x.Instructor)
-                                .Include(x => x.TrainingProgram_Syllabus)
-                                .ThenInclude(x => x.TrainingProgram)
-                                .OrderByDescending(x => x.CreatedDate).ToArrayAsync();
+                .GetAll()
+                .Include(x => x.Instructor)
+                .Include(x => x.TrainingProgram_Syllabus)
+                .ThenInclude(x => x.TrainingProgram)
+                .OrderByDescending(x => x.CreatedDate).ToArrayAsync();
 
             var syllabusList = syllabusQuery
-                                .Skip((pageNumber - 1) * pageSize)
-                                .Take(pageSize);
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize);
 
             var listSyllabusModel = new List<SyllabusModel>();
-            var trainingProgramUnits = await _trainingProgramUnitRepository.GetAll().ToListAsync();
 
             foreach (var sy in syllabusList)
             {
                 var slots = await _trainingProgramUnitRepository
-                            .GetAll()
-                            .Where(y => y.SyllabusId == sy.SyllabusId)
-                            .Select(x => x.UnitId)
-                            .ToListAsync();
+                    .GetAll()
+                    .Where(y => y.SyllabusId == sy.SyllabusId && y.Status.ToLower() != "inactive")
+                    .Select(x => x.UnitId)
+                    .ToListAsync();
 
-                var learningObjs = _learningObjRepository.GetAll().Where(x => slots.Contains((int)x.UnitId)).Include(x => x.OutputStandard).ToList();
+                var learningObjs = _learningObjRepository.GetAll()
+                    .Where(x => slots.Contains((int)x.UnitId) && x.Status.ToLower() != "inactive")
+                    .Include(x => x.OutputStandard).ToList();
 
                 var outPutStandards = _mapper.Map<List<OutputStandardModel>>(learningObjs
-                                                 .Select(x => x.OutputStandard)
-                                                 .DistinctBy(x => x.OutputStandardId));
+                    .Select(x => x.OutputStandard)
+                    .DistinctBy(x => x.OutputStandardId));
 
                 listSyllabusModel.Add(new SyllabusModel
                 {
@@ -342,6 +301,7 @@ namespace Mock_Project_Net03.Services
             return (listSyllabusModel, totalPages);
 
         }
+
         public async Task<Entities.Syllabus> CreateSyllabus(SyllabusModel syllabusModel)
         {
             try
@@ -357,6 +317,7 @@ namespace Mock_Project_Net03.Services
                 throw new BadRequestException(ex.Message);
             }
         }
+
         public List<SyllabusModel> SearchSyllabusAsync(string keyword)
         {
             var syllabusList = _syllabusRepository
@@ -367,13 +328,16 @@ namespace Mock_Project_Net03.Services
             var listSyllabusModel = _mapper.Map<List<SyllabusModel>>(syllabusList);
             return listSyllabusModel;
         }
-        public SyllabusModel GetSyllabusByCode(string code) 
+
+        public SyllabusModel GetSyllabusByCode(string code)
         {
-            var result = _syllabusRepository.FindByCondition(s => s.Code.ToLower().Equals(code.ToLower())).FirstOrDefault();
-            if (result is not null) 
+            var result = _syllabusRepository.FindByCondition(s => s.Code.ToLower().Equals(code.ToLower()))
+                .FirstOrDefault();
+            if (result is not null)
             {
                 return _mapper.Map<SyllabusModel>(result);
             }
+
             throw new BadRequestException($"Can not find this Syllabus with the code {code}");
         }
 
@@ -385,6 +349,7 @@ namespace Mock_Project_Net03.Services
             {
                 return syllabusEntity;
             }
+
             return null;
         }
 
@@ -403,7 +368,7 @@ namespace Mock_Project_Net03.Services
                 {
                     throw new NotFoundException("Syllabus not existed!");
                 }
-                
+
                 if (existedSyllabus.Status.ToLower() == "isused")
                 {
                     req.SyllabusModel.Status = "Active";
@@ -423,30 +388,42 @@ namespace Mock_Project_Net03.Services
                 {
                     existedSyllabus.Name = req.SyllabusModel.Name;
                 }
+
                 if (!string.IsNullOrEmpty(req.SyllabusModel.Description))
                 {
                     existedSyllabus.Description = req.SyllabusModel.Description;
                 }
+
+                if (!string.IsNullOrEmpty(req.SyllabusModel.UpdatedBy))
+                {
+                    existedSyllabus.UpdatedBy = req.SyllabusModel.UpdatedBy;
+                }
+
                 if (!string.IsNullOrEmpty(req.SyllabusModel.Level))
                 {
                     existedSyllabus.Level = req.SyllabusModel.Level;
                 }
+
                 if (!string.IsNullOrEmpty(req.SyllabusModel.TechnicalRequirement))
                 {
                     existedSyllabus.TechnicalRequirement = req.SyllabusModel.TechnicalRequirement;
                 }
+
                 if (!string.IsNullOrEmpty(req.SyllabusModel.Outline))
                 {
                     existedSyllabus.Outline = req.SyllabusModel.Outline;
                 }
+
                 if (!string.IsNullOrEmpty(req.SyllabusModel.CourseObjectives))
                 {
                     existedSyllabus.CourseObjectives = req.SyllabusModel.CourseObjectives;
                 }
+
                 if (!string.IsNullOrEmpty(req.SyllabusModel.TrainingDelivery))
                 {
                     existedSyllabus.TrainingDelivery = req.SyllabusModel.TrainingDelivery;
                 }
+
                 if (req.SyllabusModel.AttendeeNumber > 0)
                 {
                     existedSyllabus.AttendeeNumber = req.SyllabusModel.AttendeeNumber;
@@ -458,18 +435,19 @@ namespace Mock_Project_Net03.Services
                 {
                     bool canAdd = false;
                     req.AssessmentSchemeSyllabusModels.ForEach(a => a.SyllabusId = existedSyllabus.SyllabusId);
-                    var assessmentSchemes = _mapper.Map<List<AssessmentScheme_Syllabus>>(req.AssessmentSchemeSyllabusModels);
+                    var assessmentSchemes =
+                        _mapper.Map<List<AssessmentScheme_Syllabus>>(req.AssessmentSchemeSyllabusModels);
                     assessmentSchemes.ForEach(a => a.Syllabus = existedSyllabus);
                     foreach (var assessmentScheme in assessmentSchemes)
                     {
-                        var checkExisted = _assessmentSchemeSyllabusRepository.FindByCondition(a => 
-                        a.AssessmentSchemeId == assessmentScheme.AssessmentSchemeId &&
-                        a.SyllabusId == assessmentScheme.SyllabusId
+                        var checkExisted = _assessmentSchemeSyllabusRepository.FindByCondition(a =>
+                            a.AssessmentSchemeId == assessmentScheme.AssessmentSchemeId &&
+                            a.SyllabusId == assessmentScheme.SyllabusId
                         ).FirstOrDefault();
 
-                        if(checkExisted == null)
+                        if (checkExisted == null)
                         {
-                            canAdd = true;
+                            await _assessmentSchemeSyllabusRepository.AddAsync(assessmentScheme);
                         }
                         else
                         {
@@ -477,22 +455,22 @@ namespace Mock_Project_Net03.Services
                             _assessmentSchemeSyllabusRepository.Update(checkExisted);
                         }
                     }
-                    if (canAdd)
-                    {
-                        await _assessmentSchemeSyllabusRepository.AddRangeAsync(assessmentSchemes);
-                    }
-                        await _assessmentSchemeSyllabusRepository.Commit();
+
+                    await _assessmentSchemeSyllabusRepository.Commit();
                 }
 
                 if (req.CreateTrainingProgramUnits != null)
                 {
                     foreach (var UpdateTrainingProgramUnit in req.CreateTrainingProgramUnits)
                     {
-                        var checkUnitExisted = _trainingProgramUnitRepository.FindByCondition(t => t.UnitId == UpdateTrainingProgramUnit.TrainingProgramUnitModel.UnitId).FirstOrDefault();
+                        var checkUnitExisted = _trainingProgramUnitRepository
+                            .FindByCondition(t => t.UnitId == UpdateTrainingProgramUnit.TrainingProgramUnitModel.UnitId)
+                            .FirstOrDefault();
                         if (checkUnitExisted == null)
                         {
                             UpdateTrainingProgramUnit.TrainingProgramUnitModel.SyllabusId = existedSyllabus.SyllabusId;
-                            var trainingProgramUnit = _mapper.Map<TrainingProgramUnit>(UpdateTrainingProgramUnit.TrainingProgramUnitModel);
+                            var trainingProgramUnit =
+                                _mapper.Map<TrainingProgramUnit>(UpdateTrainingProgramUnit.TrainingProgramUnitModel);
                             trainingProgramUnit.Syllabus = existedSyllabus;
                             var unit = await _trainingProgramUnitRepository.AddAsync(trainingProgramUnit);
                             await _trainingProgramUnitRepository.Commit();
@@ -503,13 +481,16 @@ namespace Mock_Project_Net03.Services
                                     if (UpdateLearningObject.LearningObjModel != null)
                                     {
                                         UpdateLearningObject.LearningObjModel.UnitId = unit.UnitId;
-                                        var learningObject = _mapper.Map<LearningObj>(UpdateLearningObject.LearningObjModel);
+                                        var learningObject =
+                                            _mapper.Map<LearningObj>(UpdateLearningObject.LearningObjModel);
                                         await _learningObjRepository.AddAsync(learningObject);
                                         await _learningObjRepository.Commit();
                                         if (UpdateLearningObject.MaterialModels != null)
                                         {
-                                            UpdateLearningObject.MaterialModels.ForEach(m => m.LearningObjId = learningObject.LearningObjId);
-                                            var materials = _mapper.Map<List<Materials>>(UpdateLearningObject.MaterialModels);
+                                            UpdateLearningObject.MaterialModels.ForEach(m =>
+                                                m.LearningObjId = learningObject.LearningObjId);
+                                            var materials =
+                                                _mapper.Map<List<Materials>>(UpdateLearningObject.MaterialModels);
                                             await _materialsRepository.AddRangeAsync(materials);
                                             await _materialsRepository.Commit();
                                         }
@@ -527,17 +508,22 @@ namespace Mock_Project_Net03.Services
                             {
                                 foreach (var UpdateLearningObject in UpdateTrainingProgramUnit.CreateLearningObjects)
                                 {
-                                    var checkLearningObjExisted = _learningObjRepository.FindByCondition(t => t.LearningObjId == UpdateLearningObject.LearningObjModel.LearningObjId).FirstOrDefault();
+                                    var checkLearningObjExisted = _learningObjRepository.FindByCondition(t =>
+                                            t.LearningObjId == UpdateLearningObject.LearningObjModel.LearningObjId)
+                                        .FirstOrDefault();
                                     if (checkLearningObjExisted == null)
                                     {
                                         UpdateLearningObject.LearningObjModel.UnitId = unit.UnitId;
-                                        var learningObject = _mapper.Map<LearningObj>(UpdateLearningObject.LearningObjModel);
+                                        var learningObject =
+                                            _mapper.Map<LearningObj>(UpdateLearningObject.LearningObjModel);
                                         await _learningObjRepository.AddAsync(learningObject);
                                         await _learningObjRepository.Commit();
                                         if (UpdateLearningObject.MaterialModels != null)
                                         {
-                                            UpdateLearningObject.MaterialModels.ForEach(m => m.LearningObjId = learningObject.LearningObjId);
-                                            var materials = _mapper.Map<List<Materials>>(UpdateLearningObject.MaterialModels);
+                                            UpdateLearningObject.MaterialModels.ForEach(m =>
+                                                m.LearningObjId = learningObject.LearningObjId);
+                                            var materials =
+                                                _mapper.Map<List<Materials>>(UpdateLearningObject.MaterialModels);
                                             await _materialsRepository.AddRangeAsync(materials);
                                             await _materialsRepository.Commit();
                                         }
@@ -551,10 +537,13 @@ namespace Mock_Project_Net03.Services
                                         {
                                             foreach (var UpdateMaterial in UpdateLearningObject.MaterialModels)
                                             {
-                                                var checkMaterialExisted = _materialsRepository.FindByCondition(t => t.MaterialsId == UpdateMaterial.MaterialsId).FirstOrDefault();
+                                                var checkMaterialExisted = _materialsRepository
+                                                    .FindByCondition(t => t.MaterialsId == UpdateMaterial.MaterialsId)
+                                                    .FirstOrDefault();
                                                 if (checkMaterialExisted == null)
                                                 {
-                                                    UpdateMaterial.LearningObjId = UpdateLearningObject.LearningObjModel.LearningObjId;
+                                                    UpdateMaterial.LearningObjId = UpdateLearningObject.LearningObjModel
+                                                        .LearningObjId;
                                                     var material = _mapper.Map<Materials>(UpdateMaterial);
                                                     await _materialsRepository.AddAsync(material);
                                                     await _materialsRepository.Commit();
@@ -619,27 +608,31 @@ namespace Mock_Project_Net03.Services
                 InstructorId = syllabus.InstructorId,
                 Instructor = syllabus.Instructor
             };
-            
+
             var res = await _syllabusRepository.AddAsync(newSyllabus);
             await _syllabusRepository.Commit();
             return res.SyllabusId;
         }
-        public List<SyllabusModel> GetSyllabusByTrainingProgramId(int id) 
+
+        public List<SyllabusModel> GetSyllabusByTrainingProgramId(int id)
         {
             var syllabus_Program = _syllabusRepository.FindByCondition(x => x.TrainingProgram_Syllabus
-            .Any(tps => tps.TrainingProgramId == id && tps.Status == "Active")).ToList();
-            if (syllabus_Program == null) 
+                .Any(tps => tps.TrainingProgramId == id && tps.Status == "Active")).ToList();
+            if (syllabus_Program == null)
             {
                 throw new BadRequestException("This syllabus does not belongs to any Training Program");
             }
+
             List<SyllabusModel> syllabuses = new List<SyllabusModel>();
-            foreach(var syllabus in  syllabus_Program) 
+            foreach (var syllabus in syllabus_Program)
             {
-                var countSyllabusSlot = _trainingProgramUnitRepository.FindByCondition(tu => tu.SyllabusId == syllabus.SyllabusId).ToList().Count();
+                var countSyllabusSlot = _trainingProgramUnitRepository
+                    .FindByCondition(tu => tu.SyllabusId == syllabus.SyllabusId).ToList().Count();
                 var syllabusModel = _mapper.Map<SyllabusModel>(syllabus);
                 syllabusModel.Slot = countSyllabusSlot;
                 syllabuses.Add(syllabusModel);
             }
+
             return syllabuses;
         }
 
@@ -650,6 +643,7 @@ namespace Mock_Project_Net03.Services
             {
                 throw new BadRequestException("Cannot find this Syllabus");
             }
+
             syllabus.Status = status;
             await _syllabusRepository.Commit();
             return syllabus;
@@ -684,12 +678,16 @@ namespace Mock_Project_Net03.Services
             return listSyllabus;
         }
 
+
+
+
+
         public async Task<List<SyllabusModel>> getAllSyllabusByUserId(int id)
         {
             var trainingProgramId = await _userRepository.FindByCondition(x => x.UserId == id)
                 .Include(x => x.TrainingProgram)
-                .ThenInclude(x=>x.TrainingProgram_Syllabus)
-                .ThenInclude(x=>x.Syllabus)
+                .ThenInclude(x => x.TrainingProgram_Syllabus)
+                .ThenInclude(x => x.Syllabus)
                 .Select(x => x.TrainingProgramId)
                 .FirstOrDefaultAsync();
 
@@ -705,20 +703,22 @@ namespace Mock_Project_Net03.Services
 
             var listSyllabusModel = new List<SyllabusModel>();
 
-            foreach ( var syllabus in listSyllabus) 
-                {
-                var getsyllabus = _syllabusRepository.FindByCondition(x=>x.SyllabusId == syllabus.SyllabusId).FirstOrDefault();
+            foreach (var syllabus in listSyllabus)
+            {
+                var getsyllabus = _syllabusRepository.FindByCondition(x => x.SyllabusId == syllabus.SyllabusId)
+                    .FirstOrDefault();
                 var slots = await _trainingProgramUnitRepository
-                           .GetAll()
-                           .Where(y => y.SyllabusId == syllabus.SyllabusId)
-                           .Select(x => x.UnitId)
-                           .ToListAsync();
+                    .GetAll()
+                    .Where(y => y.SyllabusId == syllabus.SyllabusId)
+                    .Select(x => x.UnitId)
+                    .ToListAsync();
 
-                var learningObjs = _learningObjRepository.GetAll().Where(x => slots.Contains((int)x.UnitId)).Include(x => x.OutputStandard).ToList();
+                var learningObjs = _learningObjRepository.GetAll().Where(x => slots.Contains((int)x.UnitId))
+                    .Include(x => x.OutputStandard).ToList();
 
                 var outPutStandards = _mapper.Map<List<OutputStandardModel>>(learningObjs
-                                                 .Select(x => x.OutputStandard)
-                                                 .DistinctBy(x => x.OutputStandardId));
+                    .Select(x => x.OutputStandard)
+                    .DistinctBy(x => x.OutputStandardId));
 
                 listSyllabusModel.Add(new SyllabusModel
                 {
@@ -731,12 +731,158 @@ namespace Mock_Project_Net03.Services
                     OutputStandards = outPutStandards.ToList(),
                     Status = syllabus.Status
                 });
-            } 
+            }
+
             return listSyllabusModel;
-         
+
         }
 
+        public List<TrainingProgramUnitModel> GetAllTrainingUnitsBySyllabusId(int id)
+        {
+            var units = _trainingProgramUnitRepository.FindByCondition(x => x.SyllabusId == id).ToList();
+            if (units.IsNullOrEmpty())
+            {
+                throw new BadRequestException("Syllabus does not include any units");
+            }
 
+            return _mapper.Map<List<TrainingProgramUnitModel>>(units);
+        }
 
+        public async Task<bool> ImportSyllabus(Stream syllabusStream, int userId)
+        {
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
+            using var xlPackage = new ExcelPackage(syllabusStream);
+            var mainWorksheet = xlPackage.Workbook.Worksheets[1];
+            var rowCount = mainWorksheet.Dimension.Rows;
+
+            var s = new Entities.Syllabus();
+            var headlineDict = new Dictionary<string, (int Span, int Start)>();
+            var latestValue = "";
+            for (var row = 2; row <= rowCount; row++)
+            {
+                var val = mainWorksheet.Cells[row, 2].Value?.ToString();
+                // validate value
+                if (string.IsNullOrEmpty(val))
+                {
+                    var t = headlineDict[latestValue];
+                    headlineDict.Remove(latestValue);
+                    headlineDict.TryAdd(latestValue, (t.Span + 1, t.Start));
+                }
+                else
+                {
+                    latestValue = val;
+                    headlineDict.TryAdd(val, (1, row));
+                }
+            }
+
+            // Console.WriteLine(dict[dict.Keys.ElementAt(1)].Start);
+            var topicName = mainWorksheet.Cells[headlineDict[headlineDict.Keys.ElementAt(1)].Start, 3].Value?.ToString();
+            var topicCode = mainWorksheet.Cells[headlineDict[headlineDict.Keys.ElementAt(2)].Start, 3].Value?.ToString();
+            var version = mainWorksheet.Cells[headlineDict[headlineDict.Keys.ElementAt(3)].Start, 3].Value?.ToString();
+            var objectiveVal = headlineDict[headlineDict.Keys.ElementAt(5)];
+
+            var outputStandards = new List<OutputStandard>();
+            for (var row = objectiveVal.Start + 2; row < objectiveVal.Start + objectiveVal.Span - 1; row++)
+            {
+                if (mainWorksheet.Cells[row, 4].Value == null)
+                {
+                    continue;
+                }
+                var outputStandard = new OutputStandard
+                {
+                    Tags = mainWorksheet.Cells[row, 4].Value?.ToString(),
+                    Description = mainWorksheet.Cells[row, 5].Value?.ToString(),
+                };
+
+                outputStandards.Add(outputStandard);
+            }
+            
+            await _outputStandardRepository.AddRangeAsync(outputStandards);
+            await _outputStandardRepository.Commit();
+            
+            s.Name = topicName;
+            s.Code = topicCode;
+            s.Version = version;
+            s.InstructorId = userId;
+
+            var syllabus = await _syllabusRepository.AddAsync(s);
+            
+            var tpu = xlPackage.Workbook.Worksheets[2];
+            
+            var trainingProgramUnitDict = new Dictionary<string, (int Span, int Start)>();
+            
+            for (var row = 3; row <= tpu.Dimension.Rows; row++)
+            {
+                var val = tpu.Cells[row, 2].Value?.ToString();
+                // validate value
+                if (string.IsNullOrEmpty(val))
+                {
+                    var t = trainingProgramUnitDict[latestValue];
+                    trainingProgramUnitDict.Remove(latestValue);
+                    trainingProgramUnitDict.TryAdd(latestValue, (t.Span + 1, t.Start));
+                }
+                else
+                {
+                    latestValue = val;
+                    trainingProgramUnitDict.TryAdd(val, (1, row));
+                }
+            }
+            
+            var trainingProgramUnits = new List<TrainingProgramUnit>();
+            var learningObjectives = new List<LearningObj>();
+            // print out the trainingProgramUnitDict
+            foreach (var key in trainingProgramUnitDict.Keys)
+            {
+                var indexString = tpu.Cells[trainingProgramUnitDict[key].Start, 1].Value?.ToString();
+                if (!int.TryParse(indexString, out var index))
+                {
+                    continue;
+                }
+                var t = new TrainingProgramUnit
+                {
+                    SyllabusId = syllabus.SyllabusId,
+                    Syllabus = syllabus,
+                    UnitName = key,
+                    Status = "active",
+                    Index = index,
+                };
+                
+                trainingProgramUnits.Add(t);
+                // var unit = await _trainingProgramUnitRepository.AddAsync(t);
+                // await _trainingProgramRepository.Commit();
+                
+                for (var row = trainingProgramUnitDict[key].Start; row < trainingProgramUnitDict[key].Start + trainingProgramUnitDict[key].Span; row++)
+                {
+                    var code = tpu.Cells[row, 5].Value?.ToString();
+                    var outputStandard = outputStandards.FirstOrDefault(x => x.Tags == code);
+                    if (outputStandard == null)
+                    {
+                        continue;
+                    }
+                    var learningObj = new LearningObj
+                    {
+                        OutputStandard = outputStandard,
+                        Name = tpu.Cells[row, 4].Value?.ToString(),
+                        Status = "active",
+                        DeliveryType = tpu.Cells[row, 6].Value?.ToString(),
+                        Duration = tpu.Cells[row, 7].Value?.ToString(),
+                        OutputStandardId = outputStandard.OutputStandardId,
+                        Unit = t,
+                    };
+                    learningObjectives.Add(learningObj);
+                    // await _learningObjRepository.AddAsync(learningObj);
+                    // await _learningObjRepository.Commit();
+                }
+            }
+            
+            await _trainingProgramUnitRepository.AddRangeAsync(trainingProgramUnits);
+            await _trainingProgramUnitRepository.Commit();
+            await _learningObjRepository.AddRangeAsync(learningObjectives);
+            await _learningObjRepository.Commit();
+            await _syllabusRepository.Commit();
+
+            return true;
+        }
     }
 }

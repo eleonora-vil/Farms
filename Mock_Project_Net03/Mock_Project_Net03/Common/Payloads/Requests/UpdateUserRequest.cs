@@ -4,7 +4,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Mock_Project_Net03.Common.Payloads.Requests
 {
-    public class UpdateUserRequest
+    public class 
+        UpdateUserRequest
     {
         public string? CurrentUserName { get; set; }
         public string? UserName { get; set; }
@@ -50,10 +51,10 @@ namespace Mock_Project_Net03.Common.Payloads.Requests
                 PhoneNumber = req.PhoneNumber,
             };
 
-            if (!string.IsNullOrEmpty(req.Password))
-            {
-                userModel.Password = SecurityUtil.Hash(req.Password);
-            }
+            // if (!string.IsNullOrEmpty(req.Password))
+            // {
+            //     userModel.Password = SecurityUtil.Hash(req.Password);
+            // }
 
             // Kiểm tra và thiết lập ngày sinh
             if (req.BirthDate.HasValue)

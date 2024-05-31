@@ -21,7 +21,9 @@ namespace Mock_Project_Net03.Common.Payloads.Requests
 
         public DateTime EndDate { get; set; }
 
-        
+        public string LastUpdatedBy { get; set; }
+        public DateTime LastModifiedDate { get; set; }
+
         public List<int> SyllabusIds { get; set; }
 
     }
@@ -36,6 +38,8 @@ namespace Mock_Project_Net03.Common.Payloads.Requests
                 Description = req.GeneralInformation,
                 StartDate = req.StartDate,
                 EndDate = req.EndDate,
+                LastUpdatedBy = req.LastUpdatedBy,
+                LastModifiedDate = req.LastModifiedDate,
                 TrainingProgram_Syllabus = new List<TrainingProgram_Syllabus>()
             };
             foreach (var sy in req.SyllabusIds)

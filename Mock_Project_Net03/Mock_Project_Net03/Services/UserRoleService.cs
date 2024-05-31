@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Mock_Project_Net03.Dtos;
 using Mock_Project_Net03.Entities;
 using Mock_Project_Net03.Exceptions;
@@ -30,7 +31,7 @@ namespace Mock_Project_Net03.Services
         public List<UserRoleModel> GetAll(int currentId)
         {
             var roles = _userRoleRepository.FindByCondition(x => x.RoleId > currentId).ToList();
-            if (roles == null)
+            if (roles.IsNullOrEmpty())
             {
                 throw new BadRequestException("Can not find any Role");
             }

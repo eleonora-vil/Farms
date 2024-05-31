@@ -32,7 +32,7 @@ namespace Mock_Project_Net03.Common.Payloads.Requests
                 CourseObjectives = createSyllabusGeneral.CourseObjectives,
                 TrainingDelivery = "",
                 AttendeeNumber = createSyllabusGeneral.AttendeeNumber,
-                Status = "Active",
+                Status = "Draft",
                 InstructorId = 1,
             };
             return model;

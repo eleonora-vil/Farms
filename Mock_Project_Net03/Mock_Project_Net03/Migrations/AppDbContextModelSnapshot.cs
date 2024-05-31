@@ -130,36 +130,34 @@ namespace Mock_Project_Net03.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ClassId"));
 
+                    b.Property<string>("ClassCode")
+                        .HasColumnType("text");
+
                     b.Property<string>("ClassName")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<int>("InstructorId")
+                    b.Property<int?>("InstructorId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("ProgramId")
+                    b.Property<int?>("ProgramId")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("timestamp without time zone");
+                    b.Property<int?>("SemesterId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Status")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
-
-                    b.Property<int>("Time")
-                        .HasColumnType("integer");
 
                     b.HasKey("ClassId");
 
                     b.HasIndex("InstructorId");
 
                     b.HasIndex("ProgramId");
+
+                    b.HasIndex("SemesterId");
 
                     b.ToTable("Class");
                 });
@@ -458,6 +456,29 @@ namespace Mock_Project_Net03.Migrations
                     b.ToTable("Room");
                 });
 
+            modelBuilder.Entity("Mock_Project_Net03.Entities.Semester", b =>
+                {
+                    b.Property<int>("SemesterID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("SemesterID"));
+
+                    b.Property<DateTime>("SemesterEndDate")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("SemesterName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("SemesterStartDate")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.HasKey("SemesterID");
+
+                    b.ToTable("Semester");
+                });
+
             modelBuilder.Entity("Mock_Project_Net03.Entities.StudentStatus", b =>
                 {
                     b.Property<int>("StatusId")
@@ -505,6 +526,9 @@ namespace Mock_Project_Net03.Migrations
                         .HasMaxLength(65535)
                         .HasColumnType("character varying(65535)");
 
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp without time zone");
 
@@ -535,6 +559,9 @@ namespace Mock_Project_Net03.Migrations
                         .HasMaxLength(65535)
                         .HasColumnType("character varying(65535)");
 
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text");
+
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("timestamp without time zone");
 
@@ -559,12 +586,21 @@ namespace Mock_Project_Net03.Migrations
                     b.Property<string>("CreateBy")
                         .HasColumnType("text");
 
+                    b.Property<DateTime?>("CreateDate")
+                        .HasColumnType("timestamp without time zone");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("EndDate")
                         .HasColumnType("timestamp without time zone");
+
+                    b.Property<DateTime?>("LastModifiedDate")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("LastUpdatedBy")
+                        .HasColumnType("text");
 
                     b.Property<string>("ProgramName")
                         .IsRequired()
@@ -802,19 +838,21 @@ namespace Mock_Project_Net03.Migrations
                 {
                     b.HasOne("Mock_Project_Net03.Entities.User", "Instructor")
                         .WithMany()
-                        .HasForeignKey("InstructorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("InstructorId");
 
                     b.HasOne("Mock_Project_Net03.Entities.TrainingProgram", "Program")
                         .WithMany()
-                        .HasForeignKey("ProgramId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ProgramId");
+
+                    b.HasOne("Mock_Project_Net03.Entities.Semester", "Semester")
+                        .WithMany()
+                        .HasForeignKey("SemesterId");
 
                     b.Navigation("Instructor");
 
                     b.Navigation("Program");
+
+                    b.Navigation("Semester");
                 });
 
             modelBuilder.Entity("Mock_Project_Net03.Entities.Class_TrainingUnit", b =>

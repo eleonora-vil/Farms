@@ -20,23 +20,24 @@ namespace Mock_Project_Net03.Entities
         [MaxLength(255)]
         public string ClassName { get; set; }
 
-        public int ProgramId { get; set; }
+        public string? ClassCode { get; set; }
+        public int? ProgramId { get; set; }
 
-        public int InstructorId { get; set; }
+        public int? SemesterId { get; set; }
 
-        public DateTime StartDate { get; set; }
-
-        public DateTime EndDate { get; set; }
-
-        public ClassTime Time { get; set; }
+        public int? InstructorId { get; set; }
 
         [MaxLength(50)]
-        public string Status { get; set; }
+        public string? Status { get; set; }
+
+        [ForeignKey("SemesterId")]
+        public Semester? Semester { get; set; }
 
         [ForeignKey("ProgramId")]
-        public TrainingProgram Program { get; set; }
+        public TrainingProgram? Program { get; set; }
 
         [ForeignKey("InstructorId")]
-        public User Instructor { get; set; }
+        public User? Instructor { get; set; }
     }
 }
+

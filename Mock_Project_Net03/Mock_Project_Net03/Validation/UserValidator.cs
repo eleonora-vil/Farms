@@ -17,9 +17,9 @@ namespace Mock_Project_Net03.Validation
                 .NotEmpty().WithMessage("Fullname can not be empty")
                 .Matches("^[a-zA-Z\\s]*$")
                 .WithMessage("Fullname can not be empty");
-            RuleFor(x => x.Password)
-                .NotEmpty()
-                .WithMessage("Password can not be empty");
+            // RuleFor(x => x.Password)
+            //     .NotEmpty()
+            //     .WithMessage("Password can not be empty");
             RuleFor(x => x.BirthDate)
                 .NotNull().WithMessage("BirthDate can not be empty");
             RuleFor(x => x.Gender)

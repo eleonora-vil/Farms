@@ -19,10 +19,10 @@ namespace Mock_Project_Net03.Controllers
             _classService = classService;
         }
 
-        [HttpPost("SearchFreeInstructor")]
-        public async Task<IActionResult> SearchFreeInstructor([FromBody] CheckFreeIntructorModel req)
+        [HttpGet("SearchFreeInstructor")]
+        public async Task<IActionResult> SearchFreeInstructor(int slot, DateTime day)
         {
-            if (req.Slot < 1 ||  req.Slot > 3)
+            if (slot < 1 ||  slot > 3)
             {
                 return BadRequest(ApiResult<GetInstructorsResponse>.Error(new GetInstructorsResponse
                 {
@@ -30,7 +30,7 @@ namespace Mock_Project_Net03.Controllers
                 }));
             }
 
-            var result = await _classService.SearchFreeInstructors(req);
+            var result = await _classService.SearchFreeInstructors(slot, day);
 
             if (result == null)
             {
@@ -44,7 +44,7 @@ namespace Mock_Project_Net03.Controllers
                 return Ok(ApiResult<GetInstructorsResponse>.Succeed(new GetInstructorsResponse
                 {
                     Users = result,
-                    message = "Invalid Request"
+                    message = "Succeed"
                 }));
             }
         }

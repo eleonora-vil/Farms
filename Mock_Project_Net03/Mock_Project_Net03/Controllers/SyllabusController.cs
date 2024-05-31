@@ -7,6 +7,7 @@ using Mock_Project_Net03.Common.Payloads.Responses;
 using Mock_Project_Net03.Common.Payloads.Responses.SyllabusResonse;
 using Mock_Project_Net03.Dtos;
 using Mock_Project_Net03.Dtos.CreateSyllabus_Dtos;
+using Mock_Project_Net03.Entities;
 using Mock_Project_Net03.Exceptions;
 using Mock_Project_Net03.Services;
 
@@ -44,22 +45,6 @@ namespace Mock_Project_Net03.Controllers
                 return BadRequest(ApiResult<GetSyllabusResponse>.Fail(ex));
             }
         }
-        [HttpGet("get/allSyllbusOftrainee/{userId}")]
-        public async Task<IActionResult> getAllSyllabusByUserId(int userId)
-        {
-            try
-            {
-                var result = await _syllabusService.getAllSyllabusByUserId(userId);
-                return Ok(ApiResult<GetSyllabusResponse>.Succeed(new GetSyllabusResponse
-                {
-                    Syllabus = result,
-                }));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ApiResult<GetSyllabusResponse>.Fail(ex));
-            }
-        }
 
         [HttpGet("{syllabusId}")]
         public async Task<ActionResult<GetDetailsSyllabus>> GetSyllabusById(int syllabusId)
@@ -80,7 +65,7 @@ namespace Mock_Project_Net03.Controllers
         }
         
 
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, Super Admin, Instructor")]
         [HttpPost("Create")]
         public async Task<ActionResult<SyllabusModel>> PostSyllabusGeneral([FromBody] CreateSyllabusGeneralRequest createSyllabusGeneral)
         {
@@ -113,7 +98,7 @@ namespace Mock_Project_Net03.Controllers
         }
 
 
-        [Authorize(Roles = "Admin, Super Admin")]
+        [Authorize(Roles = "Admin, Super Admin, Instructor")]
         [HttpPut("Update/{syllabusId}")]
         public async Task<IActionResult> UpdateSyllabus(int syllabusId, [FromBody] CreateSyllabusModel req)
         {
@@ -121,10 +106,10 @@ namespace Mock_Project_Net03.Controllers
             token = token.ToString().Split()[1];
             var currentUser = await _userService.GetUserInToken(token);
             var permission = await _permissionService.GetPermissionByRoleID(currentUser.RoleID);
-            if (!permission.SyllabusAccess.Equals("Modify") && !permission.SyllabusAccess.Equals("Full access"))
-            { 
-                throw new BadRequestException("This account do not have permission");
-            }
+            // if (!permission.SyllabusAccess.Equals("Modify") && !permission.SyllabusAccess.Equals("Full access"))
+            // { 
+            //     throw new BadRequestException("This account do not have permission");
+            // }
 
             if (syllabusId <= 0)
             {
@@ -162,7 +147,7 @@ namespace Mock_Project_Net03.Controllers
             }
         }
         
-        [Authorize(Roles = "Admin, Super Admin")]
+        [Authorize(Roles = "Admin, Super Admin, Instructor")]
         [HttpPut("Duplicate/{syllabusId:int}")]
         public async Task<IActionResult> DuplicateSyllabus([FromRoute] int syllabusId)
         {
@@ -170,10 +155,10 @@ namespace Mock_Project_Net03.Controllers
             token = token.ToString().Split()[1];
             var currentUser = await _userService.GetUserInToken(token);
             var permission = await _permissionService.GetPermissionByRoleID(currentUser.RoleID);
-            if (!permission.SyllabusAccess.Equals("Modify") && !permission.SyllabusAccess.Equals("Full access"))
-            {
-                return Forbid("This account does not have permission");
-            }
+            // if (!permission.SyllabusAccess.Equals("Modify") && !permission.SyllabusAccess.Equals("Full access"))
+            // {
+            //     return Forbid("This account does not have permission");
+            // }
             var id = await _syllabusService.DuplicateSyllabus(syllabusId);
             return Ok(ApiResult<DuplicateSyllabusResponse>.Succeed(new DuplicateSyllabusResponse
             {
@@ -181,7 +166,7 @@ namespace Mock_Project_Net03.Controllers
             }));
         }
         
-        [Authorize(Roles = "Admin, Super Admin")]
+        [Authorize(Roles = "Admin, Super Admin, Instructor")]
         [HttpPut("UpdateStatus/{syllabusId}")]
         public async Task<IActionResult> UpdateSyllabusStatus(int syllabusId, [FromBody] UpdateSyllabusStatusRequest req)
         {
@@ -189,10 +174,10 @@ namespace Mock_Project_Net03.Controllers
             token = token.ToString().Split()[1];
             var currentUser = await _userService.GetUserInToken(token);
             var permission = await _permissionService.GetPermissionByRoleID(currentUser.RoleID);
-            if (!permission.SyllabusAccess.Equals("Modify") && !permission.SyllabusAccess.Equals("Full access"))
-            { 
-                return Forbid("This account do not have permission");
-            }
+            // if (!permission.SyllabusAccess.Equals("Modify") && !permission.SyllabusAccess.Equals("Full access"))
+            // { 
+            //     return Forbid("This account do not have permission");
+            // }
 
             var updatedSyllabus = await _syllabusService.UpdateSyllabusStatus(syllabusId, req.Status);
 
@@ -215,9 +200,36 @@ namespace Mock_Project_Net03.Controllers
             }
             return syllabusList;
         }
-        
 
+        [HttpGet("get/allSyllbusOftrainee/{userId}")]
+        public async Task<IActionResult> getAllSyllabusByUserId(int userId)
+        {
+            try
+            {
+                var result = await _syllabusService.getAllSyllabusByUserId(userId);
+                return Ok(ApiResult<getAllSyllabusByUserIdRespones>.Succeed(new getAllSyllabusByUserIdRespones
+                {
+                    Syllabus = result,
+                }));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResult<getAllSyllabusByUserIdRespones>.Fail(ex));
+            }
+        }
 
+        [Authorize(Roles = "Admin, Super Admin, Instructor")]
+        [HttpPost("import")]
+        public async Task<IActionResult> ImportSyllabus([FromForm] IFormFile file)
+        {
+            Request.Headers.TryGetValue("Authorization", out var token);
+            token = token.ToString().Split()[1];
+            var currentUser = await _userService.GetUserInToken(token);
+            var stream = file.OpenReadStream();
+            var ok = await _syllabusService.ImportSyllabus(stream, currentUser.UserId);
+            
+            return Ok(ok);
+        }
     }
 }
 

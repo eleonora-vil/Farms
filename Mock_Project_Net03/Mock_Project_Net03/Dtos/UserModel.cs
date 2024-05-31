@@ -11,9 +11,6 @@ namespace Mock_Project_Net03.Dtos
         [MaxLength(255)]
         public string UserName { get; set; }
 
-        [MaxLength(100)]
-        public string Password { get; set; }
-
         [MaxLength(50)]
         public string FullName { get; set; }
 

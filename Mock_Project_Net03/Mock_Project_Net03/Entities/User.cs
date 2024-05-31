@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Mock_Project_Net03.Dtos;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 
@@ -58,5 +59,10 @@ namespace Mock_Project_Net03.Entities
         [ForeignKey("UserRole")]
         public int RoleID { get; set; }
         public virtual UserRole UserRole { get; set; }
+
+        public static implicit operator User(InstructorModel v)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

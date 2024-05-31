@@ -91,6 +91,10 @@ public static class ServicesExtensions
         services.AddScoped<AssessmentSchemeService>();
         services.AddScoped<OutputStandardService>();
         services.AddScoped<ViewTrainingCalendarService>();
+        services.AddScoped<RoomService>();
+        services.AddScoped<EnrollmentService>();
+        services.AddScoped<SemesterService>();
+
 
 
         return services;

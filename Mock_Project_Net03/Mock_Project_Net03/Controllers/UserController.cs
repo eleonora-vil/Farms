@@ -43,10 +43,10 @@ namespace Mock_Project_Net03.Controllers
             token = token.ToString().Split()[1];
             var currentUser = await _userService.GetUserInToken(token);
             var permission = await _permissionService.GetPermissionByRoleID(currentUser.RoleID);
-            if (!permission.UserAccess.Equals("View") && !permission.UserAccess.Equals("Full access"))
-            {
-                throw new BadRequestException("This account do not have permission");
-            }
+            // if (!permission.UserAccess.Equals("View") && !permission.UserAccess.Equals("Full access"))
+            // {
+            //     throw new BadRequestException("This account do not have permission");
+            // }
 
             if (string.IsNullOrWhiteSpace(token))
             {
@@ -80,10 +80,10 @@ namespace Mock_Project_Net03.Controllers
             token = token.ToString().Split()[1];
             var currentUser = await _userService.GetUserInToken(token);
             var permission = await _permissionService.GetPermissionByRoleID(currentUser.RoleID);
-            if (!permission.UserAccess.Equals("Create") && !permission.UserAccess.Equals("Full access"))
-            {
-                throw new BadRequestException("This account do not have permission");
-            }
+            // if (!permission.UserAccess.Equals("Create") && !permission.UserAccess.Equals("Full access"))
+            // {
+            //     throw new BadRequestException("This account do not have permission");
+            // }
             var user = req.ToUserModel();
             UserValidator validations = new UserValidator();
             var valid = await validations.ValidateAsync(user);
@@ -119,10 +119,10 @@ namespace Mock_Project_Net03.Controllers
             token = token.ToString().Split()[1];
             var currentUser = await _userService.GetUserInToken(token);
             var permission = await _permissionService.GetPermissionByRoleID(currentUser.RoleID);
-            if (!permission.UserAccess.Equals("Modify") && !permission.UserAccess.Equals("Full access"))
-            {
-                throw new BadRequestException("This account do not have permission");
-            }
+            // if (!permission.UserAccess.Equals("Modify") && !permission.UserAccess.Equals("Full access"))
+            // {
+            //     throw new BadRequestException("This account do not have permission");
+            // }
             if (userId <= 0)
             {
                 return BadRequest(ApiResult<UpdateUserRespone>.Error(new UpdateUserRespone
@@ -176,10 +176,10 @@ namespace Mock_Project_Net03.Controllers
             token = token.ToString().Split()[1];
             var currentUser = await _userService.GetUserInToken(token);
             var permission = await _permissionService.GetPermissionByRoleID(currentUser.RoleID);
-            if (!permission.UserAccess.Equals("Modify") && !permission.UserAccess.Equals("Full access"))
-            {
-                throw new BadRequestException("This account do not have permission");
-            }
+            // if (!permission.UserAccess.Equals("Modify") && !permission.UserAccess.Equals("Full access"))
+            // {
+            //     throw new BadRequestException("This account do not have permission");
+            // }
             if (userId <= 0)
             {
                 return BadRequest(ApiResult<UpdateUserRespone>.Error(new UpdateUserRespone
@@ -233,10 +233,10 @@ namespace Mock_Project_Net03.Controllers
             token = token.ToString().Split()[1];
             var currentUser = await _userService.GetUserInToken(token);
             var permission = await _permissionService.GetPermissionByRoleID(currentUser.RoleID);
-            if (!permission.UserAccess.Equals("Modify") && !permission.UserAccess.Equals("Full access"))
-            {
-                throw new BadRequestException("This account do not have permission");
-            }
+            // if (!permission.UserAccess.Equals("Modify") && !permission.UserAccess.Equals("Full access"))
+            // {
+            //     throw new BadRequestException("This account do not have permission");
+            // }
             if (userId <= 0)
             {
                 return BadRequest(ApiResult<UpdateUserRespone>.Error(new UpdateUserRespone
@@ -271,10 +271,10 @@ namespace Mock_Project_Net03.Controllers
             token = token.ToString().Split()[1];
             var currentUser = await _userService.GetUserInToken(token);
             var permission = await _permissionService.GetPermissionByRoleID(currentUser.RoleID);
-            if (!permission.UserAccess.Equals("View") && !permission.UserAccess.Equals("Full access"))
-            {
-                throw new BadRequestException("This account do not have permission");
-            }
+            // if (!permission.UserAccess.Equals("View") && !permission.UserAccess.Equals("Full access"))
+            // {
+            //     throw new BadRequestException("This account do not have permission");
+            // }
             if (userId <= 0)
             {
                 return BadRequest(ApiResult<GetUserByIdRespone>.Error(new GetUserByIdRespone

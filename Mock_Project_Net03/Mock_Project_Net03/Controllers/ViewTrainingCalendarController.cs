@@ -4,6 +4,7 @@ using Mock_Project_Net03.Services.Syllabus;
 using Mock_Project_Net03.Services;
 using Mock_Project_Net03.Common.Payloads.Responses;
 using Mock_Project_Net03.Common;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Mock_Project_Net03.Controllers
 {
@@ -21,11 +22,17 @@ namespace Mock_Project_Net03.Controllers
             _permissionService = permissionService;
         }
         [HttpGet("View-Training-Calendar")]
-        public async Task<IActionResult> GetAllOutPutStandardBy()
+        public async Task<IActionResult> GetDay(DateTime startDay, DateTime endDate, int? userID)
         {
             try
             {
-                var viewTrainingCalendars = await _viewTrainingCalendarService.GetDay();
+                if(endDate.Date < startDay.Date) {
+                    return BadRequest(ApiResult<ViewTrainingCalendarResponse>.Error(new ViewTrainingCalendarResponse
+                    {
+                        message = "EndDate must be after StartDay"
+                    }));
+                }
+                var viewTrainingCalendars = await _viewTrainingCalendarService.GetDay(startDay, endDate, userID);
                 return Ok(ApiResult<ViewTrainingCalendarResponse>.Succeed(new ViewTrainingCalendarResponse
                 {
                     viewTrainingCalendarModel = viewTrainingCalendars

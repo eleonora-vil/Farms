@@ -6,6 +6,7 @@ namespace Mock_Project_Net03.Dtos.ViewCalendar
     {
         public class ClassInfoModel
         {
+            public int ClassID {  get; set; }
             public string ClassName { get; set; } //  lớp học
             public int Slot { get; set; } // Slot
         }

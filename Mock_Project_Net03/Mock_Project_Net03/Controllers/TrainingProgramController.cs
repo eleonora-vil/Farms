@@ -18,6 +18,7 @@ using Microsoft.VisualBasic.FileIO;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using System.Linq.Expressions;
+using CloudinaryDotNet.Actions;
 
 namespace Mock_Project_Net03.Controllers
 {
@@ -28,9 +29,10 @@ namespace Mock_Project_Net03.Controllers
         private readonly TrainingProgramServices _trainingProgramServices;
         private readonly SyllabusService _syllabusService;
         private readonly UserService _userService;
+        private readonly ClassService _classService;
         private readonly PermissionService _permissionService;
         public TrainingProgramController(SyllabusService syllabusService, TrainingProgramServices trainingProgramServices
-            , UserService userService, PermissionService permissionService)
+            , UserService userService, PermissionService permissionService, ClassService classServices)
         {
             _trainingProgramServices = trainingProgramServices
                 ?? throw new ArgumentNullException(nameof(trainingProgramServices));
@@ -39,20 +41,21 @@ namespace Mock_Project_Net03.Controllers
             _permissionService = permissionService
                 ?? throw new ArgumentNullException(nameof(permissionService));
             _syllabusService = syllabusService;
+            _classService = classServices
+                ?? throw new ArgumentNullException(nameof(classServices));
         }
-
         [HttpGet("GetAll")]
-        [Authorize(Roles = "Super Admin")]
+        [Authorize(Roles = "Super Admin, Admin, Instructor")]
         public async Task<IActionResult> GetListTrainingPrograms()
         {
             Request.Headers.TryGetValue("Authorization", out var token);
             token = token.ToString().Split()[1];
             var currentUser = await _userService.GetUserInToken(token);
             var permission = await _permissionService.GetPermissionByRoleID(currentUser.RoleID);
-            if (!permission.UserAccess.Equals("View") && !permission.UserAccess.Equals("Full access"))
-            {
-                throw new BadRequestException("This account do not have permission");
-            }
+            // if (!permission.UserAccess.Equals("View") && !permission.UserAccess.Equals("Full access"))
+            // {
+            //     throw new BadRequestException("This account do not have permission");
+            // }
 
             if (string.IsNullOrWhiteSpace(token))
             {
@@ -66,7 +69,7 @@ namespace Mock_Project_Net03.Controllers
         }
         [HttpPost]
         [Route("Create")]
-        [Authorize(Roles = "Super Admin ,Admin")]
+        [Authorize(Roles = "Super Admin , Admin, Instructor")]
         public async Task<IActionResult> CreateTrainingProgram([FromBody] CreateTrainingProgramRequest req)
         {
             Request.Headers.TryGetValue("Authorization", out var token);
@@ -78,39 +81,40 @@ namespace Mock_Project_Net03.Controllers
             //    throw new BadRequestException("This account do not have permission");
             //}
             var program = req.ToTrainingProgram();
+            var availableProgram = _trainingProgramServices.GetTrainingProgramByName(req.ProgramName);
+            if (availableProgram is not null)
+            {
+                throw new BadRequestException("This Program has been existed");
+            }
             program.CreateBy = currentUser.UserName;
             List<SyllabusModel> syllabusModels = new List<SyllabusModel>();
             foreach (int sid in req.SyllabusID)
             {
                 var syllabus = await _syllabusService.GetSimpleSyllabusById(sid);
-                if (syllabus != null)
-                {
-                    syllabusModels.Add(syllabus);
-                }
-                else
-                {
-                    throw new BadRequestException($"Syllsbus Id {sid} does not existed ");
-                }
+                syllabusModels.Add(syllabus);
             }
             var result = await _trainingProgramServices.CreateTrainingProgram(program, syllabusModels);
-            if (result is not null)
+            return Ok(ApiResult<CreateTrainingProgramResponse>.Succeed(new CreateTrainingProgramResponse()
             {
-                return Ok(ApiResult<CreateTrainingProgramResponse>.Succeed(new CreateTrainingProgramResponse()
-                {
-                    Program = program,
-                }));
-            }
-            else
-            {
-                throw new BadHttpRequestException("Something went wrong");
-            }
+                ProgramName = program.ProgramName,
+                Description = program.Description,
+                Status = program.Status,
+                CreateBy = program.CreateBy,
+                CreateDate = program.CreateDate,
+                Version = program.Version,
+                LastModifiedDate = program.LastModifiedDate,
+                LastUpdatedBy = program.LastUpdatedBy,
+                EndDate = program.EndDate,
+                StartDate = program.StartDate,
+                ListSyllabus = syllabusModels
+            }));
 
         }
 
         //Khi ấn cancel
         [HttpDelete]
         [Route("Delete/{id}")]
-        [Authorize(Roles = "Super Admin,Admin")]
+        [Authorize(Roles = "Super Admin, Admin, Instructor ")]
         public async Task<IActionResult> DeleteTrainingProgramByID([FromRoute] int id)
         {
             var result = await _trainingProgramServices.DeleteTrainingProgram(id);
@@ -127,7 +131,7 @@ namespace Mock_Project_Net03.Controllers
             }
         }
         [HttpPut("addSyll/{id}")]
-        [Authorize(Roles = "Super Admin,Admin")]
+        [Authorize(Roles = "Super Admin, Admin, Instructor")]
         public async Task<IActionResult> AddSyllabusestoTrainingProgram([FromBody] AddSyllabusToTrainingProgramRequest req, [FromRoute] int id)
         {
             List<SyllabusModel> syllabusModels = new List<SyllabusModel>();
@@ -156,7 +160,7 @@ namespace Mock_Project_Net03.Controllers
         }
 
         [HttpPost("importCSV")]
-        [Authorize(Roles = "Super Admin,Admin")]
+        [Authorize(Roles = "Super Admin,Admin, Instructor")]
         public async Task<IActionResult> ImportTrainingProgramByCSV([FromForm] ImportTrainingProgramRequest req)
         {
             if (req.File == null || req.File.Length == 0)
@@ -291,10 +295,20 @@ namespace Mock_Project_Net03.Controllers
         }
         [HttpPut]
         [Route("UpdateTrainingProgram")]
-        [Authorize(Roles = "Super Admin,Admin")]
+        [Authorize(Roles = "Super Admin, Admin, Instructor")]
         public async Task<IActionResult> updateTrainingProgram([FromBody] UpdateTrainingProgramRequest req)
         {
             var raw_data = req.ToUpdateTrainingProgram();
+            //Check program available to update
+            var checkAvalibleofProgram = await _classService.CheckProgramAvailableToUpdate(raw_data.ProgramId);
+            if (!checkAvalibleofProgram)
+            {
+                return BadRequest(ApiResult<UpdateTrainingProgramResponse>.Error(new UpdateTrainingProgramResponse
+                {
+                    message = $"The program {raw_data.ProgramId} isn't available to update because the program has been used in the class!"
+                }));
+            }
+            //continue
             var raw_syllabusIds = req.SyllabusIds;
             var syllabuses = new List<TrainingProgram_Syllabus>();
             foreach (var data in raw_syllabusIds)
@@ -306,6 +320,7 @@ namespace Mock_Project_Net03.Controllers
                 syllabuses.Add(Syllabus);
             }
             raw_data.TrainingProgram_Syllabus = syllabuses;
+
             var result = await _trainingProgramServices.UpdateTrainingProgram(raw_data);
             var listSyllabuses = _syllabusService.GetSyllabusByTrainingProgramId(raw_data.ProgramId);
             if (result != null)
@@ -317,6 +332,10 @@ namespace Mock_Project_Net03.Controllers
                     Description = result.Description,
                     Status = result.Status,
                     CreateBy = result.CreateBy,
+                    CreateDate = result.CreateDate.Value,
+                    lastUpdatedBy = result.LastUpdatedBy,
+                    lastModifiedDate = result.LastModifiedDate.Value,
+                    Version = result.Version,
                     ListSyllabus = listSyllabuses
                     //Updated_Data = result,
                     //SyllabusIds = result.TrainingProgram_Syllabus.Select( s=> s.SyllabusId ).ToList(),
@@ -330,13 +349,13 @@ namespace Mock_Project_Net03.Controllers
         }
 
         [HttpPut]
-        [Authorize(Roles = "Super Admin,Admin")]
+        [Authorize(Roles = "Super Admin , Admin, Instructor")]
         [Route("UpdateStatus")]
-        public async Task<IActionResult> UpdateStatusProGra(int programId, string status)
+        public async Task<IActionResult> UpdateStatusProGra(int programId, string status, string modifiedBy)
         {
             if (status.ToLower().Contains("active") || status.ToLower().Contains("deactive") || status.ToLower().Contains("draft"))
             {
-                var program = await _trainingProgramServices.UpdateStatusTrainingProgram(programId, status);
+                var program = await _trainingProgramServices.UpdateStatusTrainingProgram(programId, status, modifiedBy);
                 if (program != null)
                 {
                     var message = $"Update status successful for ProgramId: {program.ProgramId} with Status: {program.Status}";
@@ -353,7 +372,7 @@ namespace Mock_Project_Net03.Controllers
         }
 
         [HttpGet("getDetails/{id}")]
-        [Authorize(Roles = "Super Admin, Admin")]
+        [Authorize(Roles = "Super Admin, Admin, Instructor")]
         public async Task<IActionResult> GetTrainingProgramDetails([FromRoute] int id)
         {
             var trainingProgram = await _trainingProgramServices.GetTrainingProgramById(id);
@@ -368,25 +387,23 @@ namespace Mock_Project_Net03.Controllers
                 Description = trainingProgram.Description,
                 Status = trainingProgram.Status,
                 CreateBy = trainingProgram.CreateBy,
+                LastModifiedDate = trainingProgram.LastModifiedDate,
+                LastUpdatedBy = trainingProgram.LastUpdatedBy,
                 ListSyllabus = listSyllabuses
             }));
         }
         [HttpGet("search")]
         [Authorize(Roles = "Super Admin, Admin, Instructor")]
-        public async Task<IActionResult> SearchTrainingPrograms(string? keyword, int pageNumber, int pageSize, string? createdBy, DateTime? startDate, DateTime? endDate, string? status)
+        public async Task<IActionResult> SearchTrainingPrograms(string? keyword, int? pageNumber, int? pageSize, DateTime? createDate, string? createdBy, string? status)
         {
-            if (keyword.IsNullOrEmpty())
-            {
-                keyword = " ";
-            }
             Func<TrainingProgram, bool> filter = p =>
                 (string.IsNullOrEmpty(createdBy) || p.CreateBy.ToLower() == createdBy.ToLower()) &&
-                (!startDate.HasValue || p.StartDate.Value.Date >= startDate.Value.Date) &&
-                (!endDate.HasValue || p.EndDate.Value.Date <= endDate.Value.Date) &&
+                //(!startDate.HasValue || p.StartDate.Value.Date >= startDate.Value.Date) &&
+                //(!endDate.HasValue || p.EndDate.Value.Date <= endDate.Value.Date) &&
+                (!createDate.HasValue || p.CreateDate.Value.Date == createDate.Value.Date) &&
                 (string.IsNullOrEmpty(status) || p.Status.ToLower() == status.ToLower());
-            if (pageNumber == 0) pageNumber = 1;
-            if (pageSize == 0)  pageSize = int.MaxValue;
             var trainingPrograms = await _trainingProgramServices.SearchTrainingProgram(keyword, pageNumber, pageSize, filter);
+            trainingPrograms = trainingPrograms.OrderBy(t => t.ProgramId).ToList();
             if (!trainingPrograms.Any())
             {
                 return Ok(ApiResult<SearchTrainingProgramResponse>.Succeed(new SearchTrainingProgramResponse
@@ -396,7 +413,8 @@ namespace Mock_Project_Net03.Controllers
             }
             return Ok(ApiResult<SearchTrainingProgramResponse>.Succeed(new SearchTrainingProgramResponse
             {
-                message = $"Found {trainingPrograms.Count} programs!",
+                message = $"Page: {pageNumber} Found {trainingPrograms.Count} programs!",
+                page = pageNumber,
                 list = trainingPrograms,
             })); ;
 

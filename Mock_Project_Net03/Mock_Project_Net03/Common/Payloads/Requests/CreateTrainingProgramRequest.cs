@@ -17,6 +17,8 @@ namespace Mock_Project_Net03.Common.Payloads.Requests
         {
             var trainingModel = new TrainingProgramModel()
             {
+                Version = "1.0",
+                CreateDate = DateTime.Now,
                 ProgramName = req.ProgramName,
                 Description = req.Description,       
             };

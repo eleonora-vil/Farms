@@ -1,92 +1,128 @@
 # Mock_Project_Team3
 
-
-
 ## Getting started
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+To get the application up and running, there are two strategies:
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+- Running the application on the local network (needs manual database setup)
+- Running the application in a container (doesn't need manual setup)
+- Already deployed application: can be access through [https://famsproject.ddns.net/login](https://famsproject.ddns.net/login) with credentials `superadmin@gmail.com`/`123456`
 
-## Add your files
+### API documentation
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+- Postman: [link](https://documenter.getpostman.com/view/25687326/2sA2rCV2oy)
 
+### Setting up
+
+The mail settings and cloud settings need to be updated accordingly
+
+```json
+"MailSettings": {
+  "Server": "smtp.gmail.com",
+  "Port": "<PORT-NUMBER>",
+  "SenderName": "<SENDER-NAME>",
+  "SenderEmail": "<EMAIL>",
+  "UserName": "<USERNAME>",
+  "PassWord": "<YOUR-MAIL-PASSWORD>"
+},
+"CloundSettings": {
+  "CloundName": "<CLOUD-NAME>",
+  "CloundKey": "<CLOUD-KEY>",
+  "CloundSecret": "<YOUR-SECRET>"
+}
 ```
-cd existing_repo
-git remote add origin http://git.fa.edu.vn/hcm24_cpl_net_03/mock_project_team3.git
-git branch -M main
-git push -uf origin main
+
+### Running on the local network
+
+Update the connection string in `Mock_Project_Net03\Mock_Project_Net03\appsettings.json` to the PostgreSQL data source
+
+> Server=localhost;Database=DBMockProject;Port=5432;User Id=postgres;Password=123456
+
+After that, navigate to `Mock_Project_Net03\Mock_Project_Net03`, and then run
+
+> dotnet run
+
+### Running on the container
+
+Even simpler, navigate to `Mock_Project_Net03\Mock_Project_Net03`, and then run
+
+> docker-compose up
+
+After that, navigate to `http://localhost:8888/swagger/index.html`
+
+to see the OpenAPI documentation
+
+## Migrations
+
+To apply the migration to a data source, first setup the database in the `appsettings.json`
+
+Then navigate to `Mock_Project_Net03\Mock_Project_Net03`, and then run
+
+> dotnet-ef database update
+
+## Basic workflow
+
+To create a feature/use case, extend a service in `Mock_Project_Net03\Mock_Project_Net03\Services`, or if there isn't one, create a new class
+
+```csharp
+public class TestService
+{
+  private readonly IRepository<TestRepository, int> _testRepo;
+  public TestService(IRepository<TestRepository, int> testRepo)
+  {
+    _testRepo = testRepo;
+  }
+}
 ```
 
-## Integrate with your tools
+Whenever a repository related to an entity is needed, just add one as a `readonly` field and inject it via the constructor
 
-- [ ] [Set up project integrations](http://git.fa.edu.vn/hcm24_cpl_net_03/mock_project_team3/-/settings/integrations)
+After writing the needed functionality, create a controller action in `Mock_Project_Net03\Mock_Project_Net03\Controllers`, and use the service, again via constructor injection:
 
-## Collaborate with your team
+```csharp
+[Route("api/[controller]")]
+[ApiController]
+public class ClassController : ControllerBase
+{
+  private ClassService _classService;
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+  public ClassController(ClassService classService)
+  {
+    _classService = classService;
+  }
 
-## Test and Deploy
+  [Authorize]
+  [HttpGet("{id}")]
+  public async Task<ActionResult<GetClassByIdResponse>> GetClassById(int id)
+  {
+    // do something with _classService here
+    return Ok();
+  }
+}
+```
 
-Use the built-in continuous integration in GitLab.
+### Mapping
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+Mapping definition can be put in `Mock_Project_Net03\Mock_Project_Net03\Mapper\ApplicationMapper.cs`, for example:
 
-***
+```csharp
+CreateMap<Enrollment, EnrollmentRequest>().ReverseMap();
+```
 
-# Editing this README
+### Service registrations
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
+Whenever a new `Service` class is created, it needs to be registered in `Mock_Project_Net03\Mock_Project_Net03\Extensions\ServicesExtensions.cs`, for instance:
 
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+```csharp
+services.AddScoped<SemesterService>();
+```
 
-## Name
-Choose a self-explaining name for your project.
+### Miscellaneous
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+Requests/Responses definitions should go in `Mock_Project_Net03\Mock_Project_Net03\Common\Payloads`, respectively
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+Validators are defined using `FluentValidation`, they are defined in `Mock_Project_Net03\Mock_Project_Net03\Validation`
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+DTOs are defined in `Mock_Project_Net03\Mock_Project_Net03\Dtos`
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
-
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+Mostly, other things don't need to be altered or modified further

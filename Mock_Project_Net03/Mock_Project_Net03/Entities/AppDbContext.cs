@@ -25,6 +25,7 @@ namespace Mock_Project_Net03.Entities
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
         public DbSet<Room> Rooms { get; set; }
+        public DbSet<Semester> Semesters { get; set; }
         public DbSet<OutputStandard> OutputStandards { get; set; }
         public DbSet<TrainingProgramUnit> TrainingProgramUnits { get; set;}
         public DbSet<AssessmentScheme_Syllabus> AssessmentScheme_Syllabus { get; set; }

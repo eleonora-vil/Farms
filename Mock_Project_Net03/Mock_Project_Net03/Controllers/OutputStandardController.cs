@@ -5,6 +5,7 @@ using Mock_Project_Net03.Common;
 using Mock_Project_Net03.Dtos;
 using Mock_Project_Net03.Services;
 using System.Drawing.Printing;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Mock_Project_Net03.Controllers
 {
@@ -18,6 +19,7 @@ namespace Mock_Project_Net03.Controllers
             _outputStandardService = outputStandardService;
         }
         [HttpGet("GetAllOutputStandards")]
+        [Authorize(Roles = "Super Admin, Admin, Instructor")]
         public async Task<IActionResult> GetAllOutPutStandardBy()
         {
             try
@@ -34,6 +36,7 @@ namespace Mock_Project_Net03.Controllers
             }
         }
         [HttpGet("GetOutPutStandardById/{id}")]
+        [Authorize(Roles = "Super Admin, Admin, Instructor")]
         public async Task<IActionResult> GetOutPutStandardById(int id)
         {
             try
@@ -50,6 +53,7 @@ namespace Mock_Project_Net03.Controllers
             }
         }
         [HttpPost("CreateOutPutStandard")]
+        [Authorize(Roles = "Super Admin, Admin, Instructor")]
         public async Task<IActionResult> CreateOutPutStandard(OutputStandardModel outputStandardModel)
         {
             try

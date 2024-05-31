@@ -26,7 +26,7 @@ namespace Mock_Project_Net03.Controllers
             _permissionService = permissionService;
         }
 
-        [Authorize(Roles = "Admin, Super Admin")]
+        [Authorize(Roles = "Super Admin, Admin, Instructor")]
         [HttpPost("CreateFullSyllabus")]
         public async Task<IActionResult> CreateFullSyllabus(CreateSyllabusModel createSyllabusModel)
         {
@@ -34,10 +34,10 @@ namespace Mock_Project_Net03.Controllers
             token = token.ToString().Split()[1];
             var currentUser = await _userService.GetUserInToken(token);
             var permission = await _permissionService.GetPermissionByRoleID(currentUser.RoleID);
-            if (!permission.SyllabusAccess.Equals("Modify") && !permission.SyllabusAccess.Equals("Full access"))
-            {
-                throw new BadRequestException("This account do not have permission");
-            }
+            // if (!permission.SyllabusAccess.Equals("Modify") && !permission.SyllabusAccess.Equals("Full access"))
+            // {
+            //     throw new BadRequestException("This account do not have permission");
+            // }
 
             try
             {

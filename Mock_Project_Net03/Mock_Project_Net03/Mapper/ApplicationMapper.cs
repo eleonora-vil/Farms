@@ -37,6 +37,12 @@ namespace Mock_Project_Net03.Mapper
             CreateMap<AssessmentScheme_Syllabus, AssessmentSchemeUpdateSyllabusModel>().ReverseMap();
             CreateMap<CreateSyllabusModel, Syllabus>().ReverseMap();
             CreateMap<UpdateSyllabusModel, CreateSyllabusModel>().ReverseMap();
+            CreateMap<Class_TrainingProgramUnitModel, Class_TrainingUnit>().ReverseMap();
+            CreateMap<User, InstructorModel>();
+            CreateMap<Class, ClassIntructorModel>();
+            CreateMap<Enrollment, EnrollmentModel>().ReverseMap();
+            CreateMap<Enrollment, EnrollmentRequest>().ReverseMap();
+            CreateMap<Attendance, AttendanceModel>().ReverseMap();
         }
     }
 }

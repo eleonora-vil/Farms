@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
 using Mock_Project_Net03.Dtos;
 using Mock_Project_Net03.Dtos.CreateSyllabus_Dtos;
@@ -20,12 +21,13 @@ namespace Mock_Project_Net03.Services
         {
             try
             {
-                var assessmentScheme = _mapper.Map<AssessmentScheme>(assessmentSchemeModel);
-                var existedassessmentScheme = await _assessmentSchemeRepository.FindByCondition(m => m.AssessmentSchemeName.ToLower().Equals(assessmentSchemeModel.AssessmentSchemeName.ToLower())).FirstOrDefaultAsync();
-                if (existedassessmentScheme != null)
+                var checkExisted = await _assessmentSchemeRepository
+                    .FindByCondition(x => x.AssessmentSchemeName.ToLower().Trim().Equals(assessmentSchemeModel.AssessmentSchemeName.ToLower().Trim())).FirstOrDefaultAsync();
+                if (checkExisted != null)
                 {
-                    throw new BadHttpRequestException("This AssessmentScheme has been existed");
+                    throw new Exception("Assessment Scheme's name existed!");
                 }
+                var assessmentScheme = _mapper.Map<AssessmentScheme>(assessmentSchemeModel);
                 await _assessmentSchemeRepository.AddAsync(assessmentScheme);
                 int result = await _assessmentSchemeRepository.Commit();
                 if (result > 0)
@@ -41,13 +43,17 @@ namespace Mock_Project_Net03.Services
         }
         public async Task<AssessmentScheme_ToAdd> GetAssessmentSchemeById(int id)
         {
-            var assessmentScheme = await _assessmentSchemeRepository.FindByCondition(o => o.AssessmentSchemeId == id).Include(o => o.AssessmentScheme_Syllabus).FirstOrDefaultAsync();
-            if (assessmentScheme == null)
-            {
-                throw new BadHttpRequestException("This AssessmentScheme hasn't been existed");
-            }
-            var asModel = _mapper.Map<AssessmentScheme_ToAdd>(assessmentScheme);
-            return asModel;
+            
+                var assessmentScheme = await _assessmentSchemeRepository.GetByIdAsync(id);
+                /*var assessmentScheme = await _assessmentSchemeRepository.FindByCondition(o => o.AssessmentSchemeId == id).Include(o => o.AssessmentScheme_Syllabus).FirstOrDefaultAsync();
+                */if (assessmentScheme == null)
+                {
+                    throw new BadHttpRequestException("This AssessmentScheme hasn't been existed");
+                }
+                var asModel = _mapper.Map<AssessmentScheme_ToAdd>(assessmentScheme);
+                return asModel;
+         
+          
 
         }
         public async Task<List<AssessmentScheme_ToAdd>> GetAssessmentSchemes()
