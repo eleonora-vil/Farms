@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  database:
+    image: postgres:alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=fams
+      - POSTGRES_PASSWORD=securepassword
+      - POSTGRES_DB=DBMockProject
+      - TZ=Asia/Ho_Chi_Minh
+    ports:
+      - '5433:5432'
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - dev-network
+
+  backend:
+    build: .
+    ports:
+      - '8888:80'
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__PgDbConnection=Server=database;Database=DBMockProject;User ID=fams;Password=securepassword;
+    depends_on:
+      database:
+        condition: service_started
+    networks:
+      - dev-network
+
+networks: 
+  dev-network:
+
+volumes:
+  pg_data:
